@@ -65,40 +65,57 @@ These preprocessing steps help reduce inconsistency across audio samples before 
 The feature vector combines cepstral, time-frequency, and spectral descriptors.
 
 #### A. MFCC-based features
-- MFCC coefficients
+The baseline feature block uses:
+- 20 MFCC coefficients
 - Delta MFCC
 - Delta-delta MFCC
-- Mean and standard deviation statistics
 
-MFCC features capture the overall spectral envelop and are widely used in audio classification.
+For each of these, the following statistics are computed across time:
+- Mean
+- Standard deviation
+  
+#### B. Log-mel spectrogram features
+A Log-mel spectogram is computed using:
+- `n_fft = 1024`
+- `hop_length = 256`
+- `n_mels = 64`
 
-#### Log-mel spectrogram features
-- Log-mel spectogram
-- Mean, standard deviation, and median statistics
+The following summary statistics are extracted from the log-mel representation:
+- mean
+- standard deviation
+- median
 
-Log-mel features provide a richer time-frequency representation and helps to capture class-specific distribution patterns.
+These features provide additional information about the energy distribution across frequency bands.
 
-#### Spectral features
+#### C. Spectral features
 - Spectral centroid
 - Spectral bandwidth
 - Spectral rolloff
 - Zero-crossing rate
 
-These features provide complementary information about brightness, spread of spectral energy, frequency concentration and signal activity.
+For each of these, the following statistics are computed:
+- mean
+- standard deviation
 
-### 5.3 Robustness Strategy
+These features complement the MFCC and log-mel features by describing spectral shape and signal activity.
+
+### 5.4 Robustness Strategy
 Since the project evaluates performance under clean, noisy, and band-limited conditions, additional robustness-oriented improvements can include:
 - Additive noise augmentation
 - Gain variation
 - Random bandpass or band-limiting augmentation
 
-## 6. Model and Training Setup
-The classifier used is a Support Vector Machine (SVM) with an RBF kernel inside a scikit-learn pipeline:
+## 6. Model
+The final classifier is implemented as a scikit-learn pipeline:
 
 - `StandardScaler()`
 - `SVC(kernel='rbf', C=5, gamma='scale', class_weight='balanced')`
 
-This model was chosen as SVMs perform well on cop
+The model is trained using a stratified train-validation split:
+- validation size: `20%`
+- random seed: `42`
+
+The evaluation metric used during validation is **Macro-F1**, which is suitable for multi-class classification with balanced attention across all 50 classes.
 
 ## 7. Experiments and Results
 Multiple feature and model configurations were tested to improve performance.
