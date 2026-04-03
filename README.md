@@ -120,6 +120,61 @@ The evaluation metric used during validation is **Macro-F1**, which is suitable 
 ## 7. Experiments and Results
 Multiple feature and model configurations were tested to improve performance.
 
+### Experiment 1: Baseline Logistic Regression
+The first experiment used Logistic Regression as the baseline classifier.
+
+model = Pipeline([
+    ('scaler', StandardScaler()),
+    ('clf', LogisticRegression(
+        max_iter=3000,
+        class_weight='balanced',
+        C=3.0,
+        solver='lbfgs'
+    ))
+])
+
+Validation Macro-F1: 0.5069
+
+This result provided a useful baseline, but the performance suggested that a linear classifier was not sufficient to model the more complex class boundaries in the extracted audio feature space.
+
+### Experiment 2: RBF SVM with C = 10
+The second experiment replaced Logistic Regression with a Support Vector Machine using an RBF kernel.
+
+model = Pipeline([
+    ('scaler', StandardScaler()),
+    ('clf', SVC(
+        kernel='rbf',
+        C=10,
+        gamma='scale',
+        class_weight='balanced'
+    ))
+])
+
+Validation Macro-F1: 0.6236
+
+This produced a clear improvement over the baseline, showing that a non-linear classifier was more suitable for the handcrafted DSP features.
+
+### Experiment 3: RBF SVM with C = 5
+
+A further experiment was performed by reducing the regularisation parameter from C=10 to C=5.
+
+model = Pipeline([
+    ('scaler', StandardScaler()),
+    ('clf', SVC(
+        kernel='rbf',
+        C=5,
+        gamma='scale',
+        class_weight='balanced'
+    ))
+])
+
+Validation Macro-F1: 0.6407
+
+This configuration achieved the best validation performance among the tested models and was therefore selected as the final model.
+
+### Final Model Selection
+
+The final selected model is the RBF SVM with C=5. Compared with the baseline Logistic Regression model, it achieved a substantially higher Macro-F1 score. It also performed better than the C=10 SVM setting, suggesting that C=5 provided a better balance between fitting the training data and generalising to unseen validation samples.
 
 ## 8. Key Observations
 - MFCC-based features provide a strong baseline for ESC.
